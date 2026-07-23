@@ -1,0 +1,401 @@
+{
+  "name": "Telegram Virtual AI Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -960,
+        32
+      ],
+      "id": "8c4d7b1c-9b7e-4af3-9f27-70bdea4d5b54",
+      "name": "Telegram Trigger",
+      "webhookId": "69faf41e-842f-4103-8705-db2a4f6bea4e",
+      "credentials": {
+        "telegramApi": {
+          "id": "hoNiWEqqEhXBpF0D",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.userMessage }}",
+                    "rightValue": "=Start",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "4de0a66f-8f90-427c-b651-c0d6945ebef9"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "start"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "73028000-0b8d-42f5-bc1e-11811615ca05",
+                    "leftValue": "={{ $json.userMessage }}",
+                    "rightValue": "=Help",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Help"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "1fe6f4ab-7880-4071-b25d-0236b3605a7e",
+                    "leftValue": "={{ $json.userMessage }}",
+                    "rightValue": "Hello",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Greeting"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "9e26b081-d9a6-4979-817d-0df6f5db6fbd",
+                    "leftValue": "={{ $json.userMessage }}",
+                    "rightValue": "D",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -560,
+        0
+      ],
+      "id": "ca571fd9-a7b7-4bf4-aa43-6cb585923499",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1088d4b6-2935-4b7c-a85b-d948a32e358e",
+              "name": "userMessage",
+              "value": "={{ $json.message.text }}",
+              "type": "object"
+            },
+            {
+              "id": "738738cf-6f50-4fd4-af68-b4ba6ccd7130",
+              "name": "chatId",
+              "value": "={{ $json.message.chat.id }}",
+              "type": "object"
+            },
+            {
+              "id": "e55b986c-6d5e-41e1-9a43-f9289f983b6e",
+              "name": "username",
+              "value": "={{ $json.message.chat.username }}",
+              "type": "string"
+            },
+            {
+              "id": "cef3f3f1-a27d-4cc6-b502-925f77d0fbda",
+              "name": "firstName",
+              "value": "={{ $json.message.chat.first_name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "ignoreConversionErrors": true
+        }
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -752,
+        32
+      ],
+      "id": "0b7111fe-5439-4253-81eb-c8d08dfbaf04",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.userMessage }}",
+        "options": {
+          "systemMessage": "You are the official AI Business Consultant of MNRATHI PVT LTD.\n\nCompany Services\n\n• AI Automation\n• AI Chatbots\n• AI Agents\n• Workflow Automation\n• Custom Software Development\n• CRM Development\n• ERP Integration\n• Website Development\n• Cloud Hosting\n• Cloud Migration\n• API Integration\n• Business Dashboards\n\nRules\n\n1. Only recommend our services.\n2. Never invent services.\n3. Ask questions to understand customer requirements.\n4. Be professional.\n5. Keep answers under 150 words.\n6. If someone asks for pricing, explain that pricing depends on project requirements and invite them to share details for a customized quotation.\n7. If the customer is interested, collect:\n   - Company Name\n   - Contact Person\n   - Email\n   - Phone Number\n   - Business Requirement"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -272,
+        80
+      ],
+      "id": "c57eccf6-1518-46f8-aecf-de309f88e8a3",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        256
+      ],
+      "id": "c15e0889-1f09-4618-bc20-d219eb259870",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "jAz8NXx5DuDfQJFH",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "📌 Our Services\n\n🤖 AI Chatbots\n⚙️ Workflow Automation\n💻 Custom Software\n🌐 Website Development\n☁️ Cloud Hosting\n📊 Dashboards\n🔗 API Integration\n📱 WhatsApp & Telegram Bots\n\nSimply describe your business requirement and I'll guide you.",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -128,
+        -224
+      ],
+      "id": "08cdabcf-4451-46c6-b1ea-e53bc87122e2",
+      "name": "Send a text message1",
+      "webhookId": "6f4fc6d3-5de4-489b-a929-02e96b40de4c",
+      "credentials": {
+        "telegramApi": {
+          "id": "hoNiWEqqEhXBpF0D",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "👋 Welcome to MNRATHI PVT LTD\n\nWe specialize in:\n\n• AI Automation\n• AI Agents\n• Custom Software Development\n• Website Development\n• Cloud Hosting\n• Business Dashboards\n\nType \"Help\" to see our services or describe your business requirement.",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -384,
+        -224
+      ],
+      "id": "f4f28708-05d9-486e-b788-be53f4d3cc0b",
+      "name": "Send a text message2",
+      "webhookId": "05f55eb6-40ab-460f-b1f2-44b73511b87a",
+      "credentials": {
+        "telegramApi": {
+          "id": "hoNiWEqqEhXBpF0D",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "=Hello {{$json.firstName}} 👋\n\nWelcome to MNRATHI PVT LTD.\n\nHow can we help your business today?",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        112,
+        -208
+      ],
+      "id": "476790c9-ae21-44c8-91cc-660cff048f16",
+      "name": "Send a text message3",
+      "webhookId": "5eecfcf6-b680-4082-b367-5f224bed4d17",
+      "credentials": {
+        "telegramApi": {
+          "id": "hoNiWEqqEhXBpF0D",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Switch').item.json.chatId }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        128,
+        80
+      ],
+      "id": "48585755-53f3-4004-bc53-ecdf5017ab7b",
+      "name": "Send a text message",
+      "webhookId": "5cc4e628-f236-4b16-82f2-23a79a07f308",
+      "credentials": {
+        "telegramApi": {
+          "id": "hoNiWEqqEhXBpF0D",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Send a text message2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "05f05d88-1f29-4294-93cd-adba61e3ecee",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0844ce0d87f3776d1a716d895776fd81f4e2ece2de02bff5931c1934d581e0c9"
+  },
+  "nodeGroups": [],
+  "id": "XLIk56HW4E1AWpsN",
+  "tags": []
+}
