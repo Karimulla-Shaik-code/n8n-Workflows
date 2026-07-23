@@ -1,0 +1,190 @@
+{
+  "name": "Smart Gmail Auto Reply Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -656,
+        -16
+      ],
+      "id": "c0c9f867-68ef-4edc-97c3-f0a087f72602",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "uRizqTFlZWOrjZ8f",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "142caa13-0833-4bf9-84bf-279347ad3255",
+              "name": "sender",
+              "value": "={{ $json.headers.from }}",
+              "type": "string"
+            },
+            {
+              "id": "c58ea049-2114-48a2-8bab-5b65c5d59b26",
+              "name": "subject",
+              "value": "={{ $json.headers.subject }}",
+              "type": "string"
+            },
+            {
+              "id": "38090344-b14c-4380-af16-de7b860ae1ec",
+              "name": "body",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -448,
+        -16
+      ],
+      "id": "06ae20ea-5f0e-48e0-bdb7-bf600b33189a",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=\n\nYou are a professional HR Email Assistant for our company.\n\nYour task is to generate a polite, professional, and concise email reply to candidates who send resumes, job applications, or express interest in opportunities.\n\nUse the following guidelines:\n\n- Thank the candidate for reaching out and for their interest.\n- Acknowledge that their application/resume has been received.\n- Inform them that our HR team will carefully review their application.\n- If their profile is shortlisted for the next stage, our HR team will contact them with further details.\n- Do not promise an interview or selection.\n- Do not mention timelines unless they are provided.\n- Keep the response between 60 and 120 words.\n- Maintain a warm, professional, and encouraging tone.\n- End every email with:\n\nBest Regards,\nHR Team\n\nCandidate Details:\nFrom: {{$json.sender}}\nSubject: {{$json.subject}}\n\nCandidate Email:\n{{$json.body}}\n\nGenerate only the email body without any explanations or markdown.",
+        "options": {
+          "systemMessage": "You are an experienced HR Recruitment Assistant.\n\nYour job is to reply professionally to candidates who send resumes, job applications, or express interest in job opportunities.\n\nRules:\n- Always thank the candidate.\n- Confirm that the application/resume has been received.\n- Inform them that the HR team will review their application.\n- State that only shortlisted candidates will be contacted for the next steps.\n- Never promise an interview, job offer, or timeline.\n- Keep replies concise (60–120 words).\n- Maintain a polite and professional tone.\n- Sign every response with:\n\nBest Regards,\nHR Team\n\nReturn only the email body."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -256,
+        -16
+      ],
+      "id": "f8a24514-3164-47fa-a4fa-ea1fea263dd7",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        240
+      ],
+      "id": "1dfaafb0-cd81-4cef-b1f8-b19e92e28871",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "jAz8NXx5DuDfQJFH",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Edit Fields').item.json.sender }}",
+        "subject": "={{ $('Edit Fields').item.json.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        112,
+        -16
+      ],
+      "id": "6bc3262d-de9a-4875-b735-292903c5adb4",
+      "name": "Send a message",
+      "webhookId": "657658b9-df26-4c4c-8415-03353d3fc582",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "uRizqTFlZWOrjZ8f",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "12c349ba-3b90-4576-b027-152bef7aba36",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0844ce0d87f3776d1a716d895776fd81f4e2ece2de02bff5931c1934d581e0c9"
+  },
+  "nodeGroups": [],
+  "id": "hAqRAFwT7Uu0A6oE",
+  "tags": []
+}
