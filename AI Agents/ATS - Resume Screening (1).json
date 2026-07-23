@@ -1,0 +1,679 @@
+{
+  "name": "ATS - Resume Screening",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "resume-screening",
+        "options": {}
+      },
+      "id": "189d2721-19e6-43c4-85bc-1accb1913ac5",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -464,
+        80
+      ],
+      "webhookId": "23470b5f-e464-4197-a6ff-22dd898a56bd"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "resume",
+        "options": {}
+      },
+      "id": "0f0fab3b-fddd-44f3-9bae-175538968a4a",
+      "name": "Extract from File",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        112,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "844356cb-170d-4599-93b5-36601aeacda7",
+              "name": "jobDescription",
+              "value": "We are hiring a Full Stack MERN Developer.\n\nRequired Skills:\n- React\n- Node.js\n- Express.js\n- MongoDB\n- JavaScript\n- REST API\n- Git\n\nPreferred Skills:\n- Docker\n- AWS\n\nExperience:\n2+ years\n\nEducation:\nBachelor's Degree in Computer Science or related field.",
+              "type": "string"
+            },
+            {
+              "id": "ed70e85d-ae51-4c99-9c8b-c4c923028016",
+              "name": "text",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4956ff24-2e7d-4191-879a-c6c00d453f3a",
+      "name": "Edit Fields1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        368,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze the candidate resume below.\n\nResume:\n{{ $json.text }}\n\n\nJob Description:\n\n{{ $json.jobDescription }}\nReturn ONLY valid JSON.\n\n1. Analyze both the Job Description and Candidate Resume thoroughly.\n2. Extract the candidate's information from the resume.\n3. Compare the candidate's qualifications with the job requirements.\n4. Evaluate:\n   - Technical Skills\n   - Soft Skills\n   - Experience\n   - Education\n   - Certifications\n   - Projects\n   - Domain Knowledge\n   - Tools & Technologies\n5. Identify:\n   - Matching Skills\n   - Missing Skills\n   - Additional Skills\n6. Calculate an ATS Matching Score between 0 and 100.\n7. Explain why the candidate received that score.\n8. Recommend whether the candidate should move to the next hiring round.\n\n## ATS Score Guidelines\n\n90-100 = Excellent Match\n80-89 = Strong Match\n70-79 = Good Match\n60-69 = Average Match\nBelow 60 = Poor Match\n\n## Return ONLY valid JSON.\n\nDo NOT use markdown.\nDo NOT include explanations outside the JSON.\nDo NOT wrap the JSON inside ```json.\n\nReturn exactly in the following format:\n\n{\n  \"candidateName\": \"\",\n  \"email\": \"\",\n  \"phone\": \"\",\n  \"location\": \"\",\n  \"totalExperience\": \"\",\n  \"education\": [],\n  \"certifications\": [],\n  \"technicalSkills\": [],\n  \"softSkills\": [],\n  \"projects\": [],\n  \"matchingSkills\": [],\n  \"missingSkills\": [],\n  \"additionalSkills\": [],\n  \"experienceMatch\": \"\",\n  \"educationMatch\": \"\",\n  \"skillsMatch\": \"\",\n  \"projectRelevance\": \"\",\n  \"strengths\": [],\n  \"weaknesses\": [],\n  \"atsScore\": 0,\n  \"recommendation\": \"\",\n  \"summary\": \"\",\n  \"decision\": \"\"\n}\n\nDecision Rules:\n- ATS Score >= 80 → Shortlisted\n- ATS Score 60-79 → Consider\n- ATS Score < 60 → Rejected\n\nEnsure the ATS score is realistic and based on the actual comparison between the Job Description and Resume.",
+        "options": {
+          "systemMessage": "You are an expert HR Recruitment AI. Analyze the candidate resume against the job description and return ONLY valid JSON with the requested fields."
+        }
+      },
+      "id": "5c278cdf-04d4-48a3-bec0-ecb05e6d25a8",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        624,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "ba8980a6-8f2f-4a0c-be14-c8f96c30d374",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        464,
+        384
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "BAfF3XuDq3a7sAKi",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "let text = $json.output;\n\n// Remove markdown code block markers\ntext = text.replace(/```json\\s*/i, \"\");\ntext = text.replace(/```/g, \"\");\n\n// Parse JSON\nconst result = JSON.parse(text.trim());\n\nreturn [\n  {\n    json: result\n  }\n];"
+      },
+      "id": "12873000-1e19-45a1-9751-57e79b2766e8",
+      "name": "Code in JavaScript",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1024,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3e334727-379d-45fe-9d02-35b6f9b8626b",
+              "leftValue": "={{ $json.matchScore }}",
+              "rightValue": 80,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "775f03cb-8c2b-44e7-9860-30a9c72df533",
+      "name": "If",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1216,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d1218729-4931-4544-9a28-e9ca54b8412d",
+              "name": "resume",
+              "value": "={{ $json.body.resume }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -240,
+        80
+      ],
+      "id": "2b08c711-b1bf-4248-8d3a-9701a91cde1d",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.resume }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "resume"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -48,
+        80
+      ],
+      "id": "310778d6-0a0a-49b8-b4fa-179efc8744da",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "10rugCxShY8dcaC_BrrYtV5XeSBfDLOSyrryPAagNL5I",
+          "mode": "list",
+          "cachedResultName": "Freshers data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10rugCxShY8dcaC_BrrYtV5XeSBfDLOSyrryPAagNL5I/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 276296753,
+          "mode": "list",
+          "cachedResultName": "Rejected Candidates",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10rugCxShY8dcaC_BrrYtV5XeSBfDLOSyrryPAagNL5I/edit#gid=276296753"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "candidateName"
+          ],
+          "schema": [
+            {
+              "id": "candidateName",
+              "displayName": "candidateName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "totalExperience",
+              "displayName": "totalExperience",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "education",
+              "displayName": "education",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "technicalSkills",
+              "displayName": "technicalSkills",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "softSkills",
+              "displayName": "softSkills",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "projects",
+              "displayName": "projects",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "matchingSkills",
+              "displayName": "matchingSkills",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "missingSkills",
+              "displayName": "missingSkills",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "additionalSkills",
+              "displayName": "additionalSkills",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "experienceMatch",
+              "displayName": "experienceMatch",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "educationMatch",
+              "displayName": "educationMatch",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "skillsMatch",
+              "displayName": "skillsMatch",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "projectRelevance",
+              "displayName": "projectRelevance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "strengths",
+              "displayName": "strengths",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "weaknesses",
+              "displayName": "weaknesses",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "atsScore",
+              "displayName": "atsScore",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "decision",
+              "displayName": "decision",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "certifications",
+              "displayName": "certifications",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "recommendation",
+              "displayName": "recommendation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1728,
+        320
+      ],
+      "id": "1fbca990-c90a-428a-bc82-5f485ccb35a1",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8avp8jymczEZfbUI",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "10rugCxShY8dcaC_BrrYtV5XeSBfDLOSyrryPAagNL5I",
+          "mode": "list",
+          "cachedResultName": "Freshers data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10rugCxShY8dcaC_BrrYtV5XeSBfDLOSyrryPAagNL5I/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Shortlisted candidates",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10rugCxShY8dcaC_BrrYtV5XeSBfDLOSyrryPAagNL5I/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1712,
+        16
+      ],
+      "id": "aa672a43-e0e9-4791-a07e-2e53297fc9ab",
+      "name": "Append or update row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8avp8jymczEZfbUI",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const j = item.json;\n\n  return {\n    json: {\n      ...j,\n      education: (j.education || [])\n        .map(e => `${e.degree} - ${e.institution} (${e.year})`)\n        .join(\"\\n\"),\n\n      technicalSkills: (j.technicalSkills || []).join(\", \"),\n      softSkills: (j.softSkills || []).join(\", \"),\n      projects: (j.projects || []).join(\", \"),\n      matchingSkills: (j.matchingSkills || []).join(\", \"),\n      missingSkills: (j.missingSkills || []).join(\", \"),\n      additionalSkills: (j.additionalSkills || []).join(\", \"),\n      strengths: (j.strengths || []).join(\"\\n\"),\n      weaknesses: (j.weaknesses || []).join(\"\\n\"),\n      certifications: (j.certifications || []).join(\", \")\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1504,
+        304
+      ],
+      "id": "9bc953f7-ceaf-49ee-bc90-420176aec80a",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.myNewField = 1;\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1504,
+        32
+      ],
+      "id": "19d908fe-3f1f-4406-b9b4-ef446117432f",
+      "name": "Code in JavaScript2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "aeb6a967-ce25-4eeb-beb5-81dfe94637e8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0844ce0d87f3776d1a716d895776fd81f4e2ece2de02bff5931c1934d581e0c9"
+  },
+  "nodeGroups": [],
+  "id": "3wzy1Bps9XIn4rT8",
+  "tags": []
+}
