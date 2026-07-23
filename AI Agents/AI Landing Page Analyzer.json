@@ -1,0 +1,367 @@
+{
+  "name": "AI Landing Page Analyzer",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "AI Landing Page Analyzer",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -368,
+        -32
+      ],
+      "id": "0c6c8be8-f36e-4fa2-b566-28f61dbc3d8d",
+      "name": "Webhook",
+      "webhookId": "57e39c12-5e2f-4161-abbf-24edce1ff021"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d19cb046-4b60-4937-96ab-dea8668bd4af",
+              "name": "Website URL",
+              "value": "={{ $json.body['Website URL'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -144,
+        -32
+      ],
+      "id": "cd23c059-7fd3-4617-8a82-52e60d7313b2",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json['Website URL'] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-browserless-api.browserless",
+      "typeVersion": 1,
+      "position": [
+        80,
+        -32
+      ],
+      "id": "8ae8f0ce-0619-46c0-9865-d9fcf2e821d9",
+      "name": "Browserless",
+      "credentials": {
+        "browserlessApi": {
+          "id": "KUq3AjvAhQflAPmL",
+          "name": "Browserless account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a4efd0ff-eba9-4674-aa85-d8d46f35dff2",
+              "name": "markdown",
+              "value": "={{ $json.markdown }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        288,
+        -16
+      ],
+      "id": "01b7b699-203e-4f93-8607-9300c505bdc6",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze the following landing page.\n\nProvide:\n- SEO score\n- Headline quality\n- CTA quality\n- Strengths\n- Weaknesses\n- Recommendations\n\nLanding Page:\n{{ $json.markdown }}",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        496,
+        -16
+      ],
+      "id": "6cd1b864-abbf-4068-bd87-c1c4d69434a0",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        496,
+        224
+      ],
+      "id": "5064c387-3a38-493a-ab5f-b6f8eb24d271",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "jAz8NXx5DuDfQJFH",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"website_name\": \"OpenAI\",\n  \"seo_score\": 85,\n  \"headline_quality\": \"Excellent\",\n  \"cta_quality\": \"Good\",\n  \"strengths\": [\n    \"Clear messaging\",\n    \"Modern design\"\n  ],\n  \"weaknesses\": [\n    \"No pricing on homepage\"\n  ],\n  \"recommendations\": [\n    \"Add customer testimonials\",\n    \"Improve CTA visibility\"\n  ]\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        656,
+        192
+      ],
+      "id": "bfdd3273-a8a1-430c-8135-01fd288fb4fc",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1d2aac05-dfe5-45bf-a466-756e3350a396",
+              "name": "website_name",
+              "value": "={{ $json.output.website_name }}",
+              "type": "string"
+            },
+            {
+              "id": "78b29c86-b43b-4848-a656-b8e91cfa9817",
+              "name": "seo_score",
+              "value": "={{ $json.output.seo_score }}",
+              "type": "number"
+            },
+            {
+              "id": "7a57f578-8129-4aa4-b9e6-0950c55e5972",
+              "name": "cta_quality",
+              "value": "={{ $json.output.cta_quality }}",
+              "type": "string"
+            },
+            {
+              "id": "4f9c5ed5-d28d-4411-996b-9e8bb212a2cd",
+              "name": "recommendations",
+              "value": "={{ $json.output.recommendations }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        784,
+        -16
+      ],
+      "id": "58c01c5d-5beb-483d-bf67-b0893166449f",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1C7lCG3WScY3Gdieurr7zfVXXZsD1E2TbWaQRpj3dweE",
+          "mode": "list",
+          "cachedResultName": "AI Landing Page Analyzer",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1C7lCG3WScY3Gdieurr7zfVXXZsD1E2TbWaQRpj3dweE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1C7lCG3WScY3Gdieurr7zfVXXZsD1E2TbWaQRpj3dweE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "website_name",
+              "displayName": "website_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "seo_score",
+              "displayName": "seo_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cta_quality",
+              "displayName": "cta_quality",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "recommendations",
+              "displayName": "recommendations",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        992,
+        -16
+      ],
+      "id": "35a66618-bc6f-4be9-a04b-4481c4e2ccf8",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8avp8jymczEZfbUI",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Browserless",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Browserless": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "88b44a42-801a-453c-8f6e-b8ca597a0f7d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0844ce0d87f3776d1a716d895776fd81f4e2ece2de02bff5931c1934d581e0c9"
+  },
+  "nodeGroups": [],
+  "id": "uy6XlmlB4kyd6C3e",
+  "tags": []
+}
